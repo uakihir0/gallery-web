@@ -51,6 +51,7 @@ export const TweetDetail = ({ tweet }: { tweet: Tweet }) => {
             borderColor="gray.300"
             borderWidth="2px"
             p={2.5}
+            mx={2}
           >
             <Image color="#abb" />
           </Box>
@@ -62,6 +63,7 @@ export const TweetDetail = ({ tweet }: { tweet: Tweet }) => {
               borderColor="gray.300"
               borderWidth="2px"
               p={2.5}
+              mx={2}
             >
               <Share color="#abb" />
             </Box>
