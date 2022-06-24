@@ -11,6 +11,7 @@ export type Tweet = {
   imageSize: MediaSize;
   favoriteCount: number;
   retweetCount: number;
+  quality: number;
 };
 
 export type MediaSize = {

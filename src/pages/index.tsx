@@ -10,8 +10,8 @@ import {
   DrawerOverlay,
   useDisclosure,
 } from "@chakra-ui/react";
-import StackGrid from "react-stack-grid";
 
+import StackGrid from "react-stack-grid";
 import { Tweet, Tweets } from "../interactors/type";
 import { getTweets } from "../interactors/client/getTweets";
 import { ShadowBox } from "../components/ShadowBox";
@@ -47,29 +47,32 @@ const Gallery = () => {
           my={4}
         >
           <StackGrid //
-            columnWidth={300}
+            columnWidth={320}
             gutterWidth={12}
             gutterHeight={12}
           >
-            {tweets.tweets.map((tweet) => {
-              const zoom = 300 / tweet.imageSize.width;
-              const height = tweet.imageSize.height * zoom;
-              return (
-                <div key={tweet.galleryId}>
-                  <ShadowBox>
-                    <Box
-                      h={height}
-                      onClick={() => {
-                        setTweet(tweet);
-                        onOpen();
-                      }}
-                    >
-                      <img src={tweet.imageUrl} />
-                    </Box>
-                  </ShadowBox>
-                </div>
-              );
-            })}
+            {tweets.tweets
+              // クオリティーの高いもののみを表示
+              .filter((t) => t.quality == 1)
+              .map((tweet) => {
+                const zoom = 320 / tweet.imageSize.width;
+                const height = tweet.imageSize.height * zoom;
+                return (
+                  <div key={tweet.galleryId}>
+                    <ShadowBox>
+                      <Box
+                        h={height}
+                        onClick={() => {
+                          setTweet(tweet);
+                          onOpen();
+                        }}
+                      >
+                        <img src={tweet.imageUrl} />
+                      </Box>
+                    </ShadowBox>
+                  </div>
+                );
+              })}
           </StackGrid>
         </Box>
       )}
