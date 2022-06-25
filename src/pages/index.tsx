@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Box,
-  Text,
   Center,
   Drawer,
   DrawerBody,
@@ -11,11 +10,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
+import Image from "next/image";
 import StackGrid from "react-stack-grid";
 import { Tweet, Tweets } from "../interactors/type";
 import { getTweets } from "../interactors/client/getTweets";
 import { ShadowBox } from "../components/ShadowBox";
 import { TweetDetail } from "../components/TweetDetail";
+import { Header } from "../components/Hader";
 
 const Gallery = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -28,20 +29,7 @@ const Gallery = () => {
 
   return (
     <>
-      <Center //
-        w="100%"
-        bg="blue.300"
-        boxShadow="md"
-        mb={6}
-      >
-        <Text //
-          my={1.5}
-          color="white"
-          fontSize="2xl"
-        >
-          <b>Twitter Illustration Gallery</b>
-        </Text>
-      </Center>
+      <Header />
       {tweets && (
         <Box //
           my={4}
@@ -61,13 +49,19 @@ const Gallery = () => {
                   <div key={tweet.galleryId}>
                     <ShadowBox>
                       <Box
-                        h={height}
+                        width={320}
+                        height={height}
                         onClick={() => {
                           setTweet(tweet);
                           onOpen();
                         }}
                       >
-                        <img src={tweet.imageUrl} />
+                        <Image
+                          width={320}
+                          height={height}
+                          src={tweet.imageUrl}
+                          alt={tweet.imageUrl}
+                        />
                       </Box>
                     </ShadowBox>
                   </div>
