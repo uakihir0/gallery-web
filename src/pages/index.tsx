@@ -22,20 +22,40 @@ const Gallery = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tweets, setTweets] = useState<Tweets | null>(null);
   const [tweet, setTweet] = useState<Tweet | null>(null);
+  const [width, setWidth] = useState<number>(10000);
+
+  const updateWidth = (_event: any) => {
+    setWidth(window.innerWidth);
+  };
+
+  useEffect(() => {
+    setWidth(window.innerWidth);
+    window.addEventListener(`resize`, updateWidth, {
+      capture: false,
+      passive: true,
+    });
+    return () => window.removeEventListener(`resize`, updateWidth);
+  }, []);
 
   useEffect(() => {
     getTweets().then((s) => setTweets(s));
   }, []);
 
+  // サイズを計算
+  const getSize = (w: number) => {
+    if (w <= 320 * 2 + 20 * 3) return (w - 20 * 2) / 1;
+    if (w <= 320 * 3 + 20 * 4) return (w - 20 * 3) / 2;
+    if (w <= 320 * 4 + 20 * 5) return (w - 20 * 4) / 3;
+    return 320;
+  };
+
   return (
     <>
       <Header />
       {tweets && (
-        <Box //
-          my={4}
-        >
+        <Box>
           <StackGrid //
-            columnWidth={320}
+            columnWidth={getSize(width)}
             gutterWidth={12}
             gutterHeight={12}
           >
@@ -43,13 +63,14 @@ const Gallery = () => {
               // クオリティーの高いもののみを表示
               .filter((t) => t.quality == 1)
               .map((tweet) => {
-                const zoom = 320 / tweet.imageSize.width;
+                const w = getSize(width);
+                const zoom = w / tweet.imageSize.width;
                 const height = tweet.imageSize.height * zoom;
                 return (
                   <div key={tweet.galleryId}>
                     <ShadowBox>
                       <Box
-                        width={320}
+                        width={w}
                         height={height}
                         onClick={() => {
                           setTweet(tweet);
@@ -57,7 +78,7 @@ const Gallery = () => {
                         }}
                       >
                         <Image
-                          width={320}
+                          width={w}
                           height={height}
                           src={tweet.imageUrl}
                           alt={tweet.imageUrl}
