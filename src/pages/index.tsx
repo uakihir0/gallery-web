@@ -12,17 +12,20 @@ import {
 
 import Image from "next/image";
 import StackGrid from "react-stack-grid";
-import { Tweet, Tweets } from "../interactors/type";
+import { Tweet } from "../interactors/type";
 import { getTweets } from "../interactors/client/getTweets";
 import { ShadowBox } from "../components/ShadowBox";
 import { TweetDetail } from "../components/TweetDetail";
 import { Header } from "../components/Hader";
+import { chunk } from "../foundations/array";
+import { text } from "stream/consumers";
 
 const Gallery = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [tweets, setTweets] = useState<Tweets | null>(null);
+  const [tweets, setTweets] = useState<Tweet[] | null>(null);
   const [tweet, setTweet] = useState<Tweet | null>(null);
   const [width, setWidth] = useState<number>(10000);
+  const [scroll, setScroll] = useState<number>(20);
 
   const updateWidth = (_event: any) => {
     setWidth(window.innerWidth);
@@ -30,15 +33,21 @@ const Gallery = () => {
 
   useEffect(() => {
     setWidth(window.innerWidth);
-    window.addEventListener(`resize`, updateWidth, {
-      capture: false,
-      passive: true,
-    });
+    const options = { capture: false, passive: true };
+    window.addEventListener(`resize`, updateWidth, options);
     return () => window.removeEventListener(`resize`, updateWidth);
   }, []);
 
   useEffect(() => {
-    getTweets().then((s) => setTweets(s));
+    window.addEventListener(`scroll`, handleScroll);
+    return () => window.removeEventListener(`scroll`, handleScroll);
+  }, [scroll, tweets]);
+
+  useEffect(() => {
+    getTweets().then((s) => {
+      // クオリティーの高いもののみを表示
+      setTweets(s!!.tweets.filter((t) => t.quality == 1));
+    });
   }, []);
 
   // サイズを計算
@@ -47,6 +56,23 @@ const Gallery = () => {
     if (w <= 320 * 3 + 20 * 4) return (w - 20 * 3) / 2;
     if (w <= 320 * 4 + 20 * 5) return (w - 20 * 4) / 3;
     return 320;
+  };
+
+  // スクロール時に追加
+  const handleScroll = () => {
+    const bottomPosition =
+      document.body.offsetHeight - (window.scrollY + window.innerHeight);
+
+    // 画面が更新される前に更新
+    if (bottomPosition < window.innerHeight) {
+      if (tweets != null) {
+        const count = scroll + 20;
+        if (tweets.length < count) {
+          setScroll(tweets.length);
+        }
+        setScroll(scroll + 20);
+      }
+    }
   };
 
   return (
@@ -59,35 +85,32 @@ const Gallery = () => {
             gutterWidth={12}
             gutterHeight={12}
           >
-            {tweets.tweets
-              // クオリティーの高いもののみを表示
-              .filter((t) => t.quality == 1)
-              .map((tweet) => {
-                const w = getSize(width);
-                const zoom = w / tweet.imageSize.width;
-                const height = tweet.imageSize.height * zoom;
-                return (
-                  <div key={tweet.galleryId}>
-                    <ShadowBox>
-                      <Box
+            {tweets.slice(0, scroll).map((tweet) => {
+              const w = getSize(width);
+              const zoom = w / tweet.imageSize.width;
+              const height = tweet.imageSize.height * zoom;
+              return (
+                <div key={tweet.galleryId}>
+                  <ShadowBox>
+                    <Box
+                      width={w}
+                      height={height}
+                      onClick={() => {
+                        setTweet(tweet);
+                        onOpen();
+                      }}
+                    >
+                      <Image
                         width={w}
                         height={height}
-                        onClick={() => {
-                          setTweet(tweet);
-                          onOpen();
-                        }}
-                      >
-                        <Image
-                          width={w}
-                          height={height}
-                          src={tweet.imageUrl}
-                          alt={tweet.imageUrl}
-                        />
-                      </Box>
-                    </ShadowBox>
-                  </div>
-                );
-              })}
+                        src={tweet.imageUrl}
+                        alt={tweet.imageUrl}
+                      />
+                    </Box>
+                  </ShadowBox>
+                </div>
+              );
+            })}
           </StackGrid>
         </Box>
       )}
