@@ -12,7 +12,7 @@ import {
 
 import Image from "next/image";
 import StackGrid from "react-stack-grid";
-import { Tweet, Tweets } from "../interactors/type";
+import { Tweet } from "../interactors/type";
 import { getTweets } from "../interactors/client/getTweets";
 import { ShadowBox } from "../components/ShadowBox";
 import { TweetDetail } from "../components/TweetDetail";
@@ -20,7 +20,7 @@ import { Header } from "../components/Hader";
 
 const Gallery = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [tweets, setTweets] = useState<Tweets | null>(null);
+  const [tweets, setTweets] = useState<Tweet[] | null>(null);
   const [tweet, setTweet] = useState<Tweet | null>(null);
   const [width, setWidth] = useState<number>(10000);
 
@@ -30,15 +30,16 @@ const Gallery = () => {
 
   useEffect(() => {
     setWidth(window.innerWidth);
-    window.addEventListener(`resize`, updateWidth, {
-      capture: false,
-      passive: true,
-    });
+    const options = { capture: false, passive: true };
+    window.addEventListener(`resize`, updateWidth, options);
     return () => window.removeEventListener(`resize`, updateWidth);
   }, []);
 
   useEffect(() => {
-    getTweets().then((s) => setTweets(s));
+    getTweets().then((s) =>
+      // クオリティーの高いもののみを表示
+      setTweets(s!!.tweets.filter((t) => t.quality == 1))
+    );
   }, []);
 
   // サイズを計算
@@ -59,35 +60,32 @@ const Gallery = () => {
             gutterWidth={12}
             gutterHeight={12}
           >
-            {tweets.tweets
-              // クオリティーの高いもののみを表示
-              .filter((t) => t.quality == 1)
-              .map((tweet) => {
-                const w = getSize(width);
-                const zoom = w / tweet.imageSize.width;
-                const height = tweet.imageSize.height * zoom;
-                return (
-                  <div key={tweet.galleryId}>
-                    <ShadowBox>
-                      <Box
+            {tweets.map((tweet) => {
+              const w = getSize(width);
+              const zoom = w / tweet.imageSize.width;
+              const height = tweet.imageSize.height * zoom;
+              return (
+                <div key={tweet.galleryId}>
+                  <ShadowBox>
+                    <Box
+                      width={w}
+                      height={height}
+                      onClick={() => {
+                        setTweet(tweet);
+                        onOpen();
+                      }}
+                    >
+                      <Image
                         width={w}
                         height={height}
-                        onClick={() => {
-                          setTweet(tweet);
-                          onOpen();
-                        }}
-                      >
-                        <Image
-                          width={w}
-                          height={height}
-                          src={tweet.imageUrl}
-                          alt={tweet.imageUrl}
-                        />
-                      </Box>
-                    </ShadowBox>
-                  </div>
-                );
-              })}
+                        src={tweet.imageUrl}
+                        alt={tweet.imageUrl}
+                      />
+                    </Box>
+                  </ShadowBox>
+                </div>
+              );
+            })}
           </StackGrid>
         </Box>
       )}
