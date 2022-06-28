@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Box,
   Center,
@@ -14,20 +14,47 @@ import Image from "next/image";
 import StackGrid from "react-stack-grid";
 import { Tweet } from "../interactors/type";
 import { getTweets } from "../interactors/client/getTweets";
-import { ShadowBox } from "../components/ShadowBox";
 import { TweetDetail } from "../components/TweetDetail";
 import { Header } from "../components/Hader";
+import { boxShadow } from "../foundations/const";
 
 const Gallery = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tweets, setTweets] = useState<Tweet[] | null>(null);
   const [tweet, setTweet] = useState<Tweet | null>(null);
   const [width, setWidth] = useState<number>(10000);
+  const [count, setCount] = useState<number>(0);
 
   const updateWidth = (_event: any) => {
     setWidth(window.innerWidth);
   };
 
+  // 最後の画像を追う処理を追加
+  const lastRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (element === null) return;
+      const observer = new IntersectionObserver((entries, observer) => {
+        const ratio = entries[0].intersectionRatio;
+        if (ratio > 0 && ratio <= 1) {
+          observer.disconnect();
+          fetchNextImages();
+        }
+      });
+      observer.observe(element);
+    },
+    [tweets, count]
+  );
+
+  // 次の画面のロードを実行
+  const fetchNextImages = useCallback(() => {
+    if (tweets === null) return;
+    if (tweets.length > count) {
+      setCount(tweets.length);
+    }
+    setCount(count + 20);
+  }, [tweets, count]);
+
+  // リサイズハンドラ設定
   useEffect(() => {
     setWidth(window.innerWidth);
     const options = { capture: false, passive: true };
@@ -35,11 +62,14 @@ const Gallery = () => {
     return () => window.removeEventListener(`resize`, updateWidth);
   }, []);
 
+  // 初回ロード実行
   useEffect(() => {
-    getTweets().then((s) =>
+    getTweets().then((s) => {
       // クオリティーの高いもののみを表示
-      setTweets(s!!.tweets.filter((t) => t.quality == 1))
-    );
+      const results = s!!.tweets.filter((t) => t.quality == 1);
+      setCount(results.length < 20 ? results.length : 20);
+      setTweets(results);
+    });
   }, []);
 
   // サイズを計算
@@ -55,38 +85,48 @@ const Gallery = () => {
       <Header />
       {tweets && (
         <Box>
-          <StackGrid //
-            columnWidth={getSize(width)}
-            gutterWidth={12}
-            gutterHeight={12}
-          >
-            {tweets.map((tweet) => {
-              const w = getSize(width);
-              const zoom = w / tweet.imageSize.width;
-              const height = tweet.imageSize.height * zoom;
-              return (
-                <div key={tweet.galleryId}>
-                  <ShadowBox>
-                    <Box
-                      width={w}
-                      height={height}
-                      onClick={() => {
-                        setTweet(tweet);
-                        onOpen();
-                      }}
-                    >
-                      <Image
-                        width={w}
-                        height={height}
-                        src={tweet.imageUrl}
-                        alt={tweet.imageUrl}
-                      />
-                    </Box>
-                  </ShadowBox>
-                </div>
-              );
-            })}
-          </StackGrid>
+          {(() => {
+            const w = getSize(width);
+            return (
+              <StackGrid //
+                columnWidth={w}
+                gutterWidth={12}
+                gutterHeight={12}
+                duration={0}
+              >
+                {tweets //
+                  .slice(0, count)
+                  .map((tweet) => {
+                    const zoom = w / tweet.imageSize.width;
+                    const height = tweet.imageSize.height * zoom;
+                    const isLast = tweets.indexOf(tweet) === count - 1;
+
+                    return (
+                      <div key={tweet.galleryId}>
+                        <Box
+                          width={w}
+                          height={height}
+                          ref={isLast ? lastRef : undefined}
+                          boxShadow={boxShadow}
+                          onClick={() => {
+                            setTweet(tweet);
+                            onOpen();
+                          }}
+                        >
+                          <Image
+                            width={w}
+                            height={height}
+                            priority={false}
+                            src={tweet.imageUrl}
+                            alt={tweet.imageUrl}
+                          />
+                        </Box>
+                      </div>
+                    );
+                  })}
+              </StackGrid>
+            );
+          })()}
         </Box>
       )}
 
