@@ -79,6 +79,20 @@ const Gallery = () => {
     return 320;
   };
 
+  // ツイートが消されているパターンを検知
+  const unlistTweet = useCallback(
+    (tweet: Tweet) => {
+      if (tweets != null) {
+        const index = tweets.indexOf(tweet);
+        if (index !== -1) {
+          tweets.splice(index, 1);
+          setTweets(tweets);
+          setCount(count - 1);
+        }
+      }
+    },
+    [tweets, count]
+  );
   return (
     <>
       <Header />
@@ -117,6 +131,9 @@ const Gallery = () => {
                             height={height}
                             src={tweet.imageUrl}
                             alt={tweet.imageUrl}
+                            onError={() => {
+                              unlistTweet(tweet);
+                            }}
                           />
                         </Box>
                       </div>
