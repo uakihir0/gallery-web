@@ -10,7 +10,6 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
-import Image from "next/image";
 import StackGrid from "react-stack-grid";
 import { Tweet } from "../interactors/type";
 import { getTweets } from "../interactors/client/getTweets";
