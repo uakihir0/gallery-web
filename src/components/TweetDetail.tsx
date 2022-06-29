@@ -32,7 +32,7 @@ export const TweetDetail = ({ tweet }: { tweet: Tweet }) => {
         await navigator.share(data);
       }
     }
-  }, []);
+  }, [tweet]);
 
   return (
     <>
