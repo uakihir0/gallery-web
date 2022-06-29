@@ -113,7 +113,7 @@ const Gallery = () => {
                             onOpen();
                           }}
                         >
-                          <Image
+                          <img
                             width={w}
                             height={height}
                             src={tweet.imageUrl}
