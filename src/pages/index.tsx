@@ -51,7 +51,7 @@ const Gallery = () => {
     if (tweets.length > count) {
       setCount(tweets.length);
     }
-    setCount(count + 20);
+    setCount(count + 10);
   }, [tweets, count]);
 
   // リサイズハンドラ設定
@@ -67,7 +67,7 @@ const Gallery = () => {
     getTweets().then((s) => {
       // クオリティーの高いもののみを表示
       const results = s!!.tweets.filter((t) => t.quality == 1);
-      setCount(results.length < 20 ? results.length : 20);
+      setCount(results.length < 10 ? results.length : 10);
       setTweets(results);
     });
   }, []);
@@ -116,7 +116,6 @@ const Gallery = () => {
                           <Image
                             width={w}
                             height={height}
-                            priority={false}
                             src={tweet.imageUrl}
                             alt={tweet.imageUrl}
                           />
