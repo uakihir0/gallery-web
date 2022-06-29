@@ -1,0 +1,4 @@
+/* StackGrid のアニメーション問題のワークアラウンド修正 */
+#__next > div.css-0 > div > span {
+    opacity: 1 !important;
+}

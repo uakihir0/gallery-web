@@ -105,7 +105,6 @@ const Gallery = () => {
                 columnWidth={w}
                 gutterWidth={12}
                 gutterHeight={12}
-                appearDelay={0}
                 duration={0}
               >
                 {tweets //
