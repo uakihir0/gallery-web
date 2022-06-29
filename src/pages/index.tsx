@@ -115,28 +115,27 @@ const Gallery = () => {
                     const isLast = tweets.indexOf(tweet) === count - 1;
 
                     return (
-                      <div key={tweet.galleryId}>
-                        <Box
+                      <Box
+                        key={tweet.galleryId}
+                        width={w}
+                        height={height}
+                        ref={isLast ? lastRef : undefined}
+                        boxShadow={boxShadow}
+                        onClick={() => {
+                          setTweet(tweet);
+                          onOpen();
+                        }}
+                      >
+                        <img
                           width={w}
                           height={height}
-                          ref={isLast ? lastRef : undefined}
-                          boxShadow={boxShadow}
-                          onClick={() => {
-                            setTweet(tweet);
-                            onOpen();
+                          src={tweet.imageUrl}
+                          alt={tweet.imageUrl}
+                          onError={() => {
+                            unlistTweet(tweet);
                           }}
-                        >
-                          <img
-                            width={w}
-                            height={height}
-                            src={tweet.imageUrl}
-                            alt={tweet.imageUrl}
-                            onError={() => {
-                              unlistTweet(tweet);
-                            }}
-                          />
-                        </Box>
-                      </div>
+                        />
+                      </Box>
                     );
                   })}
               </StackGrid>
