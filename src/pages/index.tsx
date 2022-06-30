@@ -32,13 +32,14 @@ const Gallery = () => {
   const lastRef = useCallback(
     (element: HTMLDivElement | null) => {
       if (element === null) return;
+      const options = { threshold: 0.01 };
       const observer = new IntersectionObserver((entries, observer) => {
         const ratio = entries[0].intersectionRatio;
         if (ratio > 0 && ratio <= 1) {
           observer.disconnect();
           fetchNextImages();
         }
-      });
+      }, options);
       observer.observe(element);
     },
     [tweets, count]
