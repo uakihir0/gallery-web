@@ -3,20 +3,17 @@ import { ChakraProvider } from "@chakra-ui/react";
 import "../../styles/globals.css";
 import theme from "../theme";
 
-function MyApp({ Component, pageProps }: AppProps) {
-  const handleScroll = (e: any) => {
-    const bottom =
-      e.target.scrollHeight - e.target.scrollTop === e.target.clientHeight;
-    console.log(e.target.scrollHeight - e.target.scrollTop);
-    if (bottom) {
-      console.log("bottom");
-    }
-  };
+import { GoogleAnalytics, usePageView } from "../foundations/gtag";
 
+function MyApp({ Component, pageProps }: AppProps) {
+  usePageView();
   return (
-    <ChakraProvider resetCSS theme={theme}>
-      <Component {...pageProps} onScroll={handleScroll} />
-    </ChakraProvider>
+    <>
+      <GoogleAnalytics />
+      <ChakraProvider resetCSS theme={theme}>
+        <Component {...pageProps} />
+      </ChakraProvider>
+    </>
   );
 }
 
