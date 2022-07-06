@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/router";
+
 import {
   Box,
   Center,
@@ -18,6 +20,7 @@ import { Header } from "../components/Hader";
 import { boxShadow } from "../foundations/const";
 
 const Gallery = () => {
+  const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [tweets, setTweets] = useState<Tweet[] | null>(null);
   const [tweet, setTweet] = useState<Tweet | null>(null);
@@ -62,15 +65,18 @@ const Gallery = () => {
     return () => window.removeEventListener(`resize`, updateWidth);
   }, []);
 
-  // 初回ロード実行
+  // データセット設定
   useEffect(() => {
     getTweets().then((s) => {
       // クオリティーの高いもののみを表示
-      const results = s!!.tweets.filter((t) => t.quality == 1);
+      const { filter } = router.query;
+      const results = s!!.tweets.filter((t) =>
+        filter === "all" ? true : t.quality == 1
+      );
       setCount(results.length < 10 ? results.length : 10);
       setTweets(results);
     });
-  }, []);
+  }, [router.query]);
 
   // サイズを計算
   const getSize = (w: number) => {
