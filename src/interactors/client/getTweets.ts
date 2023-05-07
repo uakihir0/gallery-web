@@ -1,9 +1,9 @@
+import { errorHandle } from "../error";
 import { rest } from "../rest";
 import { Tweets } from "../type";
-import { errorHandle } from "../error";
 
 const getTweets = async (): Promise<Tweets | null> => {
-  const path = "/gallery.json";
+  const path = "https://www.uakihir0.com/gallery-data/gallery.json";
 
   try {
     const { data } = await rest().get<Tweets>(path);
